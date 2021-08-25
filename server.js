@@ -1,16 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const { animals } = require('./data/animals');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
-// Middleware 
+
+// Middleware
+// serve static assets within the public folder
+app.use(express.static('public'));
 // parse incoming string or array data
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
-
-const { animals } = require('./data/animals');
 
 function filterByQuery(query, animalsArray) {
     let personalityTraitsArray = [];
@@ -110,7 +112,27 @@ app.post('/api/animals', (req, res) => {
       const animal = createNewAnimal(req.body, animals);
       res.json(animal);
     }
-  });
+});
+
+app.get('/', (req, res) => {
+    // root path resolves to index.html
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+app.get('/animals', (req, res) => {
+    // path resolves to animal.html
+    res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+app.get('/zookeepers', (req, res) => {
+    // path resolves to zookeepers.html
+    res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+// always put wildcard routes at the end of the corresponding block
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
 
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
